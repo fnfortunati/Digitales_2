@@ -36,26 +36,14 @@ void alta (user_t *usuario){
     }
 }
 /*-------------------------------------------------------------------*/
-void baja (uint8_t *uid){
-	uint16_t pag;
-	uint32_t addr;
-
-	addr = buscar_uid (uid);					//Obtengo la direccion donde se encontro el uid
-
-	if (addr != 0){
-		addr = ((addr - 4) - addr_pg) / 0x40;	//Obtengo el nro de pagina
-		pag = addr + page;
-
-	    if( IAP_PrepareSectorForWrite(sector,sector) != kStatus_IAP_Success){
-	    	PRINTF("ERROR IAP_PrepareSectorForWrite \n");
-	    }
-
-	    if (IAP_ErasePage (pag,pag,frec) != kStatus_IAP_Success){
-	    	PRINTF("ERROR IAP_ErasePage \n");
-	    }
+void baja (uint16_t pag){
+	if( IAP_PrepareSectorForWrite(sector,sector) != kStatus_IAP_Success){
+	    PRINTF("ERROR IAP_PrepareSectorForWrite \n");
 	}
-	else
-		PRINTF ("NO SE ENCONTRO REGISTRO");
+
+	if (IAP_ErasePage (pag,pag,frec) != kStatus_IAP_Success){
+		PRINTF("ERROR IAP_ErasePage \n");
+	}
 }
 /*-------------------------------------------------------------------*/
 uint32_t buscar_uid (uint8_t *uid){

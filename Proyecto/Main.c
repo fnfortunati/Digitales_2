@@ -8,47 +8,37 @@ uint32_t count_mseg = 0;
 
 int main(void)
 {
-	uint8_t i;
-	uid_t uid;
-
+	uint8_t uid [4];
+	uint32_t addr;
+	char nom [16];
 
 	init ();								//configuro los perifericos
 	lcd_init (0x27,2,16);					//configuro el lcd
-	config_spi ();							//Carga la configuracion del spi
+/*
+	config_spi ();							//carga la configuracion del spi
 
-    MFRC522_Init ();
-
-    PRINTF ("REINICIO COMPLETO\n");
+    MFRC522_Init ();						//inicializo el lector
 
     while (1){
-    	if (MFRC522_IsNewCardPresent()){
-    		PRINTF ("Tarjeta Detectada\n");
+		while (!leer_tarjeta (uid)){
+			addr = buscar_uid (uid);
 
-			if (!MFRC522_ReadCardSerial(&uid))
-				return 0;
-
-			PRINTF ("Card UID: ");
-
-			for  (i = 0; i < uid.size; i++) {
-				if (uid.uidByte[i] < 0x10)  		// si el byte leido es menor a 0x10
-					PRINTF (" 0");     				// imprime espacio en blanco y numero cero
-				else
-					PRINTF (" ");      				// imprime un espacio en blanco
-
-				PRINTF ("%x", uid.uidByte[i]);		// imprime el byte del UID leido en hexadecimal
+			if (addr != 0){
+				buscar_nombre (addr, &nom);
+				abrir (&nom);
 			}
-
-			MFRC522_HaltA ();
-
-			MFRC522_StopCrypto ();
-
-			PRINTF ("\n\n");						//cambio de linea
-    	}
+			else{
+				line_lcd ("TARJETA", 1);
+				line_lcd ("NO ENCONTRADA", 2);
+				delay_ms (5000);
+			}
+		}
     }
 
+*/
 /*
-	char dat1[16] = "Linea 1";
-	char dat2[16] = "Linea 2";
+	char dat1[16] = "Fila 1";
+	char dat2[16] = "Fila 2";
 
 
 	while (1){
@@ -56,6 +46,7 @@ int main(void)
 		line_lcd (dat2,2);
 	}
 */
+	cargar_nombre (nom);
 }
 //---------------------------------------------------------------//
 

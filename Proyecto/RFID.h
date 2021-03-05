@@ -106,8 +106,8 @@
 #define     RESERVED33            0x3E
 #define     RESERVED34            0x3F
 
-#define MFRC522_CS(x)		GPIO_PinWrite(GPIO, 0, 20, x)
-#define MFRC522_RST(x)		GPIO_PinWrite(GPIO, 0, 24, x)
+#define MFRC522_RST(x)		GPIO_PinWrite(GPIO, 0, 25, x)
+#define MFRC522_CS(x)		GPIO_PinWrite(GPIO, 0, 29, x)
 
 #define STATUS_OK			0x00	//Correcto
 #define STATUS_ERROR		0x01	//Error en comunicacion

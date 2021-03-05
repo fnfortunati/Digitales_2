@@ -18,7 +18,7 @@ typedef struct{
 
 void limpiar (void);
 void alta (user_t *usuario);
-void baja (uint8_t *uid);
+void baja (uint16_t dir);
 uint32_t buscar_uid (uint8_t *uid);
 void buscar_nombre (uint32_t dir, char *name);
 uint32_t buscar_psw (uint8_t *psw);

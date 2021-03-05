@@ -14,13 +14,14 @@
 
 #include "LCD_I2C.h"
 #include "RFID.h"
+#include "IAP.h"
 
-#define UP			GPIO_PinRead(GPIO,0,8)
+#define LEFT		GPIO_PinRead(GPIO,0,8)
 #define DOWN		GPIO_PinRead(GPIO,0,9)
-#define LEFT		GPIO_PinRead(GPIO,0,10)
+#define UP			GPIO_PinRead(GPIO,0,10)
 #define RIGHT		GPIO_PinRead(GPIO,0,11)
-#define ENTER		GPIO_PinRead(GPIO,0,12)
-#define OPEN(x)		GPIO_PinWrite(GPIO,0,14,x)
+#define ENTER		GPIO_PinRead(GPIO,0,13)
+#define OPEN(x)		GPIO_PinWrite(GPIO,0,22,x)
 
 //---------------------------------------------------------------//
 // Prototipos
@@ -32,6 +33,7 @@ void alta_pers (void);
 void baja_pers (void);
 void cargar_nombre (char *nombre);
 void cargar_clave (char *clave);
+bool leer_tarjeta (uint8_t *uid);
 void abrir (char *nombre);
 
 #endif /* HEADER_H_ */
