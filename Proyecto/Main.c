@@ -8,18 +8,24 @@ uint32_t count_mseg = 0;
 
 int main(void)
 {
+
 	uint8_t uid [4];
 	uint32_t addr;
 	char nom [16];
 
 	init ();								//configuro los perifericos
+
 	lcd_init (0x27,2,16);					//configuro el lcd
-/*
+
 	config_spi ();							//carga la configuracion del spi
 
     MFRC522_Init ();						//inicializo el lector
 
+    ClearDisplay ();
+
     while (1){
+    	line_lcd ("Esperando Tarj.", 1);
+
 		while (!leer_tarjeta (uid)){
 			addr = buscar_uid (uid);
 
@@ -28,25 +34,18 @@ int main(void)
 				abrir (&nom);
 			}
 			else{
+				ClearDisplay();
 				line_lcd ("TARJETA", 1);
 				line_lcd ("NO ENCONTRADA", 2);
-				delay_ms (5000);
+				delay_ms (2000);
+				ClearDisplay();
 			}
 		}
+		if (ENTER == 0){
+			delay_ms (500);
+			menu ();
+		}
     }
-
-*/
-/*
-	char dat1[16] = "Fila 1";
-	char dat2[16] = "Fila 2";
-
-
-	while (1){
-		line_lcd (dat1,1);
-		line_lcd (dat2,2);
-	}
-*/
-	cargar_nombre (nom);
 }
 //---------------------------------------------------------------//
 

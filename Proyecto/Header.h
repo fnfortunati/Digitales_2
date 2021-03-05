@@ -28,12 +28,13 @@
 //---------------------------------------------------------------//
 void init (void);
 void menu (void);
-void ing_manual (void);
+bool ing_manual (void);
 void alta_pers (void);
 void baja_pers (void);
 void cargar_nombre (char *nombre);
 void cargar_clave (char *clave);
 bool leer_tarjeta (uint8_t *uid);
 void abrir (char *nombre);
+bool compare (uint8_t *a, uint8_t *b);
 
 #endif /* HEADER_H_ */

@@ -42,7 +42,7 @@ void init (void){
     GPIO_PinInit (GPIO,0,10,&in_config);	//BOTON ARRIBA
     GPIO_PinInit (GPIO,0,11,&in_config);	//BOTON DERECHA
     GPIO_PinInit (GPIO,0,13,&in_config);	//BOTON ENTER
-    GPIO_PinInit (GPIO,0,14,&out_config);	//LED PUERTA
+    GPIO_PinInit (GPIO,0,22,&out_config);	//LED PUERTA
 
 	GPIO_PinInit (GPIO,0,25,&out_config);	//PIN RST
 	GPIO_PinInit (GPIO,0,29,&out_config);	//PIN CHIP SELECT
@@ -57,17 +57,17 @@ void menu (void){
 	uint8_t i = 0;
 	uint8_t opc = 0;
 
-	do{
-		ClearDisplay ();
+	ClearDisplay ();
 
+	do{
 		line_lcd ("MENU",1);
 
 		if (UP == 0){
-			delay_ms (1000);
+			delay_ms (500);
 			i--;
 		}
 		if (DOWN == 0){
-			delay_ms (1000);
+			delay_ms (500);
 			i++;
 		}
 		if (i == 0xFF)
@@ -79,7 +79,7 @@ void menu (void){
 			case 0:
 				line_lcd ("ING. MANUAL   <-",2);
 				if (ENTER == 0)
-					ing_manual ();
+					opc = ing_manual ();
 				break;
 			case 1:
 				line_lcd ("ALTA PERSONA  <-",2);
@@ -98,9 +98,10 @@ void menu (void){
 				break;
 		}
 	}while (opc != 1);
+	ClearDisplay ();
 }
 //---------------------------------------------------------------//
-void ing_manual (void){
+bool ing_manual (void){
 	char clave [4];
 	char nom [16];
 	uint32_t dir;
@@ -113,87 +114,115 @@ void ing_manual (void){
 	ClearDisplay ();
 
 	line_lcd ("BUSCANDO...", 1);
-	delay_ms (5000);
+	delay_ms (2000);
 
 	if (dir != 0){
 		buscar_nombre (dir, &nom);
 		abrir (&nom);
+		return 1;
 	}
 	else{
 		ClearDisplay ();
 		line_lcd ("CLAVE", 1);
 		line_lcd ("INCORRECTA", 2);
-		delay_ms (5000);
+		delay_ms (2000);
+		return 0;
 	}
 }
 //---------------------------------------------------------------//
 void alta_pers (void){
-	uint8_t uid [4];
+	uint8_t uid [4], aux = 0;
 	user_t usuario = {0x0};
 
 	ClearDisplay ();
 
 	line_lcd ("ING. TARJ. ADM.", 1);
 
-	while (!leer_tarjeta (uid)){							//Leo la tarjeta admin
-		if ((strcmp (admin, uid)) == 0){					//Busco coincidencia con la tarj. admin
-			line_lcd ("INGRESO EXITOSO",1);
-			delay_ms (3000);
+	do{
+		while (!leer_tarjeta (uid)){							//Leo la tarjeta admin
+			if ((compare (admin, uid)) == 0){					//Busco coincidencia con la tarj. admin
+				ClearDisplay ();
+				line_lcd ("INGRESO EXITOSO",1);
+				delay_ms (2000);
 
-			cargar_nombre (usuario.nombre);
-			cargar_clave (usuario.clave);
+				cargar_nombre (usuario.nombre);
+				cargar_clave (usuario.clave);
 
-			while (!leer_tarjeta (usuario.uid)){
-				//Espero a que acerquen la tarjeta
+				ClearDisplay ();
+				line_lcd ("Esperando Tarj.", 1);
+
+				do{
+					aux = leer_tarjeta (usuario.uid);
+				}while (aux == 1);
+
+				alta (&usuario);
+
+				ClearDisplay ();
+
+				line_lcd ("CARGA EXITOSA",1);
+				delay_ms (2000);
+
 			}
-
-			alta (&usuario);
-
-			ClearDisplay ();
-
-			line_lcd ("CARGA EXITOSA",1);
-			delay_ms (3000);
-
+			else{
+				ClearDisplay ();
+				line_lcd ("USUARIO NO",1);
+				line_lcd ("ENCONTRADO",2);
+				delay_ms (2000);
+			}
+			aux = 1;
 		}
-		else{
-			line_lcd ("USUARIO NO",1);
-			line_lcd ("ENCONTRADO",2);
-		}
-	}
+	}while (aux == 0);
+	ClearDisplay ();
 }
 //---------------------------------------------------------------//
 void baja_pers (void){
-	uint8_t uid [4];
+	uint8_t uid [4],aux = 0;
 	uint16_t pag;
 	uint32_t addr;
 
 	ClearDisplay ();
 
 	line_lcd ("ING. TARJ. ADM.", 1);
-	delay_ms (3000);
+	delay_ms (2000);
+	do{
+		while (!leer_tarjeta (uid)){							//Leo la tarjeta admin
+			if ((compare (admin, uid)) == 0){					//Busco coincidencia con la tarj. admin
+				ClearDisplay ();
+				line_lcd ("INGRESO EXITOSO",1);
+				delay_ms (2000);
+				ClearDisplay ();
+				line_lcd ("TARJ. A BORRAR",1);
+				do{
+					while (!leer_tarjeta (uid)){
+						addr = buscar_uid (uid);					//Obtengo la direccion donde se encontro el uid
 
-	while (!leer_tarjeta (uid)){							//Leo la tarjeta admin
-		if ((strcmp (admin, uid)) == 0){					//Busco coincidencia con la tarj. admin
-			line_lcd ("INGRESO EXITOSO",1);
-			delay_ms (3000);
-			line_lcd ("TARJ. A BORRAR",1);
-			while (!leer_tarjeta (uid)){
-				addr = buscar_uid (uid);					//Obtengo la direccion donde se encontro el uid
+						if (addr != 0){
+							addr = ((addr - 4) - addr_pg) / 0x40;	//Obtengo el nro de pagina
+							pag = addr + page;
 
-				if (addr != 0){
-					addr = ((addr - 4) - addr_pg) / 0x40;	//Obtengo el nro de pagina
-					pag = addr + page;
-
-					baja (pag);								//Borro la pagina
-					line_lcd ("BORRADO EXITOSO",1);
-				}
-				else{
-					line_lcd ("USUARIO NO",1);
-					line_lcd ("ENCONTRADO",2);
-				}
+							baja (pag);								//Borro la pagina
+							ClearDisplay ();
+							line_lcd ("BORRADO EXITOSO",1);
+						}
+						else{
+							ClearDisplay ();
+							line_lcd ("USUARIO NO",1);
+							line_lcd ("ENCONTRADO",2);
+						}
+						aux = 1;
+					}
+				}while (aux == 0);
+			}
+			else{
+				ClearDisplay ();
+				line_lcd ("USUARIO NO",1);
+				line_lcd ("ENCONTRADO",2);
+				aux = 1;
 			}
 		}
-	}
+	}while (aux == 0);
+
+	ClearDisplay ();
 }
 //---------------------------------------------------------------//
 void cargar_nombre (char *nombre){
@@ -308,12 +337,9 @@ bool leer_tarjeta (uint8_t *uid){
 	uint8_t i;
 	uid_t aux;
 
-	ClearDisplay ();
-
-	line_lcd ("Esperando Tarj.", 1);
-
 	if (MFRC522_IsNewCardPresent()){
-		line_lcd ("Leyendo Tarj.",2);
+		ClearDisplay();
+		line_lcd ("Leyendo Tarj.",1);
 		PRINTF ("Tarj. Detectada\n");
 		if (!MFRC522_ReadCardSerial(&aux))
 			return 0;
@@ -335,17 +361,35 @@ bool leer_tarjeta (uint8_t *uid){
 		MFRC522_StopCrypto ();
 
 		PRINTF ("\n\n");						//cambio de linea
+
+		delay_ms (1000);
+		return 0;
 	}
 
 	return 1;
 }
 //---------------------------------------------------------------//
 void abrir (char *nombre){
-	line_lcd ("BIENVENIDO",1);
+	ClearDisplay();
+	line_lcd ("BIENVENID@",1);
 	line_lcd (nombre,2);
 
 	OPEN(0);
-	delay_ms (5000);
+	delay_ms (2000);
 	OPEN (1);
+	ClearDisplay();
+}
+//---------------------------------------------------------------//
+bool compare (uint8_t *a, uint8_t *b){
+	uint8_t i, result;
+
+	for (i = 0; i < 4; i++){
+		if (a[i] == b [i])
+			result = 0;
+		else
+			result = 1;
+	}
+
+	return result;
 }
 //---------------------------------------------------------------//
